@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object Detection</title>
+</head>
+<body>
+    <h1>Object Detection App</h1>
+    <input type="file" id="imageInput" accept="image/*" title="Choose an image file" label = "img">
+
+    <button onclick="uploadImage()">Detect and Download</button>
+    <p id="message"></p>
+    <img id="outputImage" alt="Detected Objects" style="display: none; max-width: 500px;">
+
+    <script>
+        async function uploadImage() {
+            const fileInput = document.getElementById("imageInput");
+            const message = document.getElementById("message");
+            const outputImage = document.getElementById("outputImage");
+
+            if (fileInput.files.length === 0) {
+                message.textContent = "Please select an image file.";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            message.textContent = "Processing image, please wait...";
+
+            try {
+                const response = await fetch("http://localhost:8000/detect/", {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error("Image processing failed.");
+                }
+
+                const data = await response.json();
+                const downloadUrl = `http://localhost:8000/download/${data.unique_id}`;
+                const imageLink = document.createElement("a");
+                imageLink.href = downloadUrl;
+                imageLink.download = `yoloDetection.zip`; 
+                document.body.appendChild(imageLink);
+                imageLink.click();  // Trigger  download
+                document.body.removeChild(imageLink);
+
+                message.textContent = "Detection completed!!";
+            } catch (error) {
+                message.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
