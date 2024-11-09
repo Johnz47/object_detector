@@ -96,26 +96,26 @@ async def detect_objects(file: UploadFile = File(...)):
 @app.get("/download/{unique_id}/")
     
 async def download_file(unique_id: str,background_tasks: BackgroundTasks):
-    print("test 2")
+
     try:
             
             folder_path = Path('runs/detect').resolve()
-            print("folder:",str(folder_path))
+          
            
             subfolders = [f for f in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, f))]   
-            print("sub:",str(subfolders)) 
+            
             latest_subfolder = max(subfolders, key=lambda x: os.path.getctime(os.path.join(folder_path, x)))    
-            print("latest:",str(latest_subfolder)) 
+          
             directory = Path(os.path.join(folder_path,latest_subfolder))    
-            print("printing directory: ",directory) 
+           
             files = os.listdir(directory)
             latest_file = files[0]
             
             
-            print(str(latest_file))
+            
     
             imfile = os.path.join(folder_path,latest_subfolder, latest_file)
-            print("imfile:",str(imfile))
+            # print("imfile:",str(imfile))
             json_path = output_json_dir/f"{unique_id}.json"
 
         # temporary folder to store the files
@@ -124,7 +124,7 @@ async def download_file(unique_id: str,background_tasks: BackgroundTasks):
 
             # Copy the files to the temporary folder
             shutil.copy(imfile, temp_folder / f"{unique_id}.jpg")
-            print("imfile 2:",str(imfile))
+            
             shutil.copy(json_path, temp_folder / f"{unique_id}.json")
             
             # Zip the folder
@@ -137,7 +137,7 @@ async def download_file(unique_id: str,background_tasks: BackgroundTasks):
             if os.path.exists(os.path.join(folder_path, latest_subfolder)):
                     shutil.rmtree(Path(os.path.join(folder_path,latest_subfolder)))
 
-            print("zip file : ",zip_file_path)
+            
             background_tasks.add_task(delete_file, zip_file_path)
             if not Path(zip_file_path).exists():
                 return JSONResponse(content={"error": "File not found"}, status_code=404)
